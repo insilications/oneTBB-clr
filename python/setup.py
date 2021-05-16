@@ -21,6 +21,7 @@ import os
 
 from distutils.core import *
 from distutils.command.build import build
+import distutils.sysconfig
 
 rundir = os.getcwd()
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
@@ -75,6 +76,17 @@ _tbb = Extension("tbb._api", ["tbb/api.i"],
         language    ='c++',
         )
 
+cfg_vars = distutils.sysconfig.get_config_vars()
+flags = ["OPT", "CFLAGS", "BASECFLAGS", "LDFLAGS", "PY_CORE_FLAGS", "PY_CFLAGS", "CONFIGURE_CFLAGS", "CONFIGURE_CFLAGS_NODIST", "CONFIG_ARGS", "PY_BUILTIN_MODULE_CFLAGS", "PY_CFLAGS", "PY_CORE_CFLAGS", "PY_STDMODULE_CFLAGS", "PY_LDFLAGS_NODIST"]
+for key, value in cfg_vars.items():
+    if type(value) == str:
+        if key in flags:
+            cfg_vars[key] = ""
+        if key == "LDSHARED":
+            cfg_vars[key] = "gcc -pthread -shared -Wl,--build-id=sha1 -Wl,--build-id=sha1"
+        #print(f"cfg_vars[{key}] = {value}")
+        #cfg_vars[key] = value.replace("-fwrapv", "")
+        #cfg_vars[key] = value.replace("--param=ssp-buffer-size=32", "")
 
 class TBBBuild(build):
     sub_commands = [  # define build order
